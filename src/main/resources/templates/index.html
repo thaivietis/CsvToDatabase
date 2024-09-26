@@ -9,18 +9,18 @@
     <div class="container">
         <h1 class="text-center">Chuyển đổi file</h1>
             <div  class="row">
-                <h3>Import file</h3>
-                <div class="input-group col-md">
-                    <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
-                    <button class="btn btn-outline-secondary" type="button" id="inputGroupFileAddon04">Upload</button>
-                </div>
+                <h3>Upload file csv</h3>
+                <form th:action="@{/upload}" method="post" enctype="multipart/form-data">
+                    <input type="file" name="file" accept=".csv" required />
+                    <button type="submit">Upload</button>
+                    <div th:if="${message}" th:text="${message}" style="color: green;"></div>
+                </form>
             </div>
             <div class="row mt-5">
-                <h3>Export file</h3>
-                <div class="input-group col-md">
-                    <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
-                    <button class="btn btn-outline-secondary" type="button" id="inputGroupFileAddon03">Download</button>
-                </div>
+                <h3>Tải xuống</h3>
+                <form th:action="@{/download}" method="get">
+                    <button type="submit">Download</button>
+                </form>
             </div>
 
         </div>
