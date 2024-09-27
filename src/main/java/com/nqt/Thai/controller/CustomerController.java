@@ -66,15 +66,22 @@ public class CustomerController {
 
         List<Customer> listUsers = customerService.findAll();
 
+        // Khởi tạo đối tượng ICsvBeanWriter
         ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
+
+        // Mảng tiêu đề của CSV
         String[] csvHeader = {"STT", "Age", "Full Name"};
         String[] nameMapping = {"id", "age", "full_name"};
+
+        // Ghi tiêu đề, mỗi phần tử của csvHeader sẽ nằm trong một cột riêng biệt
         csvWriter.writeHeader(csvHeader);
 
+        // Ghi dữ liệu người dùng
         for (Customer user : listUsers) {
-            String[] data = {String.valueOf(user.getId()), user.getFullName(), String.valueOf(user.getAge())};
-            csvWriter.write(data, nameMapping);
+            csvWriter.write(user, nameMapping);
         }
+
         csvWriter.close();
     }
+
 }
