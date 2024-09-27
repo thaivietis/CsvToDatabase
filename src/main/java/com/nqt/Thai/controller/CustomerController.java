@@ -1,33 +1,41 @@
 package com.nqt.Thai.controller;
-import java.util.List;
+
 import com.nqt.Thai.domain.Customer;
+import com.nqt.Thai.domain.Staff;
 import com.nqt.Thai.service.CsvService;
 import com.nqt.Thai.service.CustomerService;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.ui.Model;
+
 import java.io.IOException;
-import org.supercsv.io.CsvBeanWriter;
-import org.supercsv.io.ICsvBeanWriter;
-import org.supercsv.prefs.CsvPreference;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+
 @Controller
 public class CustomerController {
     private CsvService csvService;
     private CustomerService customerService;
+
     public CustomerController(CustomerService customerService, CsvService csvService) {
         this.customerService = customerService;
         this.csvService = csvService;
     }
+
     @GetMapping("/")
     public String showUploadPage(Model model) {
         return "index"; // Trả về tên file upload.html (view)
     }
+
     @PostMapping("/upload")
-    public String uploadFile(@RequestParam("file") MultipartFile file, Model model) {
+    public String uploadFile(@RequestParam("file") MultipartFile file, Model model, @RequestParam("table") String tableName) {
         String message = "";
         if (csvService.hasCsvFormat(file)) {
             try {
@@ -45,43 +53,22 @@ public class CustomerController {
         return "index";
     }
 
-    @GetMapping("/list")
-    public String getStudents(Model model) {
-        List<Customer> cusList = customerService.findAll();
-        if (!cusList.isEmpty()) {
-            model.addAttribute("Customers", cusList);
-        } else {
-            model.addAttribute("message", "Data is not found");
-        }
-        return "index"; // Trả về trang student-list.html (view)
-    }
-
     @GetMapping("/download")
-    public void exportToCSV(HttpServletResponse response) throws IOException {
-        response.setContentType("text/csv");
-
-        String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=users.csv";
-        response.setHeader(headerKey, headerValue);
-
-        List<Customer> listUsers = customerService.findAll();
-
-        // Khởi tạo đối tượng ICsvBeanWriter
-        ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
-
-        // Mảng tiêu đề của CSV
-        String[] csvHeader = {"STT", "Age", "Full Name"};
-        String[] nameMapping = {"id", "age", "full_name"};
-
-        // Ghi tiêu đề, mỗi phần tử của csvHeader sẽ nằm trong một cột riêng biệt
-        csvWriter.writeHeader(csvHeader);
-
-        // Ghi dữ liệu người dùng
-        for (Customer user : listUsers) {
-            csvWriter.write(user, nameMapping);
+    public  ResponseEntity<String> exportCsv(HttpServletResponse response, @RequestParam("table") String tableName) {
+        try {
+            response.setContentType("text/csv; charset=UTF-8");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Disposition", "attachment;filename=products.csv");
+            PrintWriter writer = response.getWriter();
+            if(tableName.equals("Customer")) {
+                csvService.export(Customer.class, writer);
+            }else if(tableName.equals("Staff")){
+                csvService.export(Staff.class, writer);
+            }else
+                csvService.export(Customer.class, writer);
+            return ResponseEntity.ok("Export file successfully");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Export file failed: " + e.getMessage());
         }
-
-        csvWriter.close();
     }
-
 }

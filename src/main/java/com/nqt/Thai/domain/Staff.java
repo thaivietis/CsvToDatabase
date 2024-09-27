@@ -10,14 +10,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "customer")
-public class Customer {
+@Table(name = "staff")
+public class Staff {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @CustomValidate(column = "STT")
-    private int id;
-    @CustomValidate(column = "Full Name")
-    private String fullName;
-    @CustomValidate(column = "Age")
-    private int age;
+    private int staffId;
+    @CustomValidate(column = "Name")
+    private String staffName;
+    @CustomValidate(column = "Email")
+    private String staffEmail;
 }
